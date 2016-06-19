@@ -21,24 +21,19 @@ def softmax(x):
     """
     ############################################################################
     #   sigma(x)_i = np.exp(x_i) / sum_{j=1}{d} np.exp(x_j)                    #
+    #   xi is the score of the right class
+    #   j runs from 1 to number of classes
     #   Just make sure that the sigmoid function is also numerically stable    #
     ############################################################################
     ### YOUR CODE HERE
-    if x.ndim == 1:
-        x = x - np.max(x)
-        exp_x = np.exp(x)
-        numerator = exp_x
-        denominator = np.sum(exp_x)
-    elif x.ndim == 2:
-        n, d = x.shape
-        x = x - np.max(x, axis=1).repeat(d).reshape(n, d)
-        exp_x = np.exp(x)
-        numerator = exp_x
-        denominator = np.sum(exp_x, axis=1).repeat(d).reshape(n,d)
-    else:
-        print "Please pass a two dimensional or one dimensional array"
-    ### END YOUR CODE
-    softmax = numerator / denominator
+    axis = x.ndim -1
+    probs = x.copy().astype('float64')    
+    probs = probs - np.max(probs, axis=axis, keepdims=True)
+    probs_exp = np.exp(probs)
+    numerator = probs_exp
+    denominator = np.sum(probs_exp, axis=axis)
+    softmax = numerator/denominator
+    # ### CODE ENDS HERE
     return softmax
 
 def test_softmax_basic():
