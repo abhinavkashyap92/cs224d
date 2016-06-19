@@ -27,7 +27,7 @@ def softmax(x):
     ############################################################################
     ### YOUR CODE HERE
     axis = x.ndim -1
-    probs = x.copy().astype('float64')    
+    probs = x.copy().astype('float64')w
     probs = probs - np.max(probs, axis=axis, keepdims=True)
     probs_exp = np.exp(probs)
     numerator = probs_exp
