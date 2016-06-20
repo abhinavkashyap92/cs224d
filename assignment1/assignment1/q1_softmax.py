@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import sys
 
 def softmax(x):
     """
@@ -27,11 +28,12 @@ def softmax(x):
     ############################################################################
     ### YOUR CODE HERE
     axis = x.ndim -1
-    probs = x.copy().astype('float64')w
+    probs = x.copy().astype('float64')
     probs = probs - np.max(probs, axis=axis, keepdims=True)
     probs_exp = np.exp(probs)
     numerator = probs_exp
-    denominator = np.sum(probs_exp, axis=axis)
+    denominator = np.sum(probs_exp, axis=axis, keepdims=True)
+
     softmax = numerator/denominator
     # ### CODE ENDS HERE
     return softmax

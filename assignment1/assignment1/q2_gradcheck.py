@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import sys
 
 # First implement a gradient checker by filling in the following functions
 def gradcheck_naive(f, x):
@@ -14,25 +15,24 @@ def gradcheck_naive(f, x):
     fx, grad = f(x) # Evaluate function value at original point
     h = 1e-4
 
+
     # Iterate over all indexes in x
     it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
+    iteration = 0
     while not it.finished:
-        ix = it.multi_index
-
+        ix = it.multi_index        
         ### try modifying x[ix] with h defined above to compute numerical gradients
         ### make sure you call random.setstate(rndstate) before calling f(x) each time, this will make it
         ### possible to test cost functions with built in randomness later
         ### YOUR CODE HERE:
-        xix = x[ix]
-        x_plus_h = xix + h
-        rndstate = random.getstate()
-        random.setstate(rndstate)
-        f_x_plus_h, _ = f(x_plus_h)
-        x_minus_h = xix - h
-        rndstate = random.getstate()
-        random.setstate(rndstate)
-        fx_minus_h, _ = f(x_minus_h)
-        numgrad = (f_x_plus_h - fx_minus_h) / (2 * h)
+        oldval = x[ix]
+        x[ix] = oldval + h
+        fxph, _ = f(x) # This evaluates the f(x+h)
+        x[ix] = oldval - h
+        fxmh, _ = f(x) # This evaluates the f(x-h)
+        x[ix] = oldval
+
+        numgrad = (fxph - fxmh) / (2 * h)
         ### END YOUR CODE
         # Compare gradients
         reldiff = abs(numgrad - grad[ix]) / max(1, abs(numgrad), abs(grad[ix]))
