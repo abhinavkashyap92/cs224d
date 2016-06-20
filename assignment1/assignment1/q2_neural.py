@@ -66,7 +66,7 @@ def forward_backward_prop(data, labels, params, dimensions, only_forward=False):
     scores = softmax(add2)
     correct_labels = np.where(labels == 1) # tuples of indices
 
-    loss = -np.sum(np.log(scores[correct_labels]))
+    loss = -np.sum(np.log(scores[correct_labels])) / N    
 
     if only_forward == True:
         return loss
@@ -74,6 +74,7 @@ def forward_backward_prop(data, labels, params, dimensions, only_forward=False):
     # Backward pass for the two layer neural network
     dadd2 = scores
     dadd2[correct_labels] -= 1 # CROSS ENTROPY LOSS
+    dadd2 /= N
 
     # add2 = dot2 + b2
     # dadd2 - shape(N * Dy)
@@ -162,7 +163,7 @@ def your_sanity_checks():
     gradcheck.
     """
     print "Running sanity check..."
-    pass    
+    pass
     ### END YOUR CODE
 
 if __name__ == "__main__":
