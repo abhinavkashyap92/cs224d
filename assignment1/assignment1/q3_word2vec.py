@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import sys
+from collections import Counter
 
 from q1_softmax import softmax
 from q2_gradcheck import gradcheck_naive
@@ -67,7 +68,7 @@ def softmaxCostAndGradient(predicted, target, outputVectors, dataset):
     grad = np.outer(dz, predicted)
     return loss, gradPred, grad
 
-def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
+def negSamplingCostAndGradientUn(predicted, target, outputVectors, dataset,
     K=10):
     """ Negative sampling cost function for word2vec models """
 
@@ -133,14 +134,47 @@ def negSamplingCostAndGradient(predicted, target, outputVectors, dataset,
         gradPred += -temp *  uk
         grad[index] += - temp * predicted
 
-
-
-
-
-
     ### END YOUR CODE
 
     return cost, gradPred, grad
+
+
+def negSamplingCostAndGradient(predicted, target, outputVectors,
+dataset, K = 10):
+    klist = []
+    for k in range(K):
+        randomId = dataset.sampleTokenIdx()
+        while randomId == target:
+            randomId = dataset.sampleTokenIdx()
+        klist.append(randomId)
+
+    u0 = outputVectors[target]
+    uks = -outputVectors[klist]
+    vc = predicted
+    U = np.vstack((u0, uks))
+
+    dot = U.dot(vc)
+    sigmoid_value = sigmoid(dot)
+    cost = -np.sum(np.log(sigmoid_value))
+
+    # print "cost is %f" % (cost, )
+
+    gradPred = np.zeros(predicted.shape)
+    grad = np.zeros(outputVectors.shape)
+
+    temp = sigmoid(u0.dot(vc)) - 1
+    intermediate = (sigmoid_value-1).reshape(-1, 1) * np.vstack((u0, -uks))
+    gradPred += intermediate[0] - np.sum(intermediate[1:,], axis=0)
+    grad[target] += temp * vc
+
+    counter_dictionary = Counter(klist)
+    unique_ks = list(counter_dictionary.keys())
+    frequency_count = np.array(list(counter_dictionary.values()))
+    grad[unique_ks] += (sigmoid(-outputVectors[unique_ks].dot(vc)) -1).reshape(-1,1) * -vc
+    grad[unique_ks] *= frequency_count.reshape(-1, 1)
+
+    return cost, gradPred, grad
+
 
 def skipgram(currentWord, C, contextWords, tokens, inputVectors, outputVectors,
     dataset, word2vecCostAndGradient = softmaxCostAndGradient):
@@ -275,7 +309,7 @@ def test_word2vec():
     dummy_tokens = dict([("a",0), ("b",1), ("c",2),("d",3),("e",4)])
     print "==== Gradient check for skip-gram ===="
     # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(skipgram, dummy_tokens, vec, dataset, 5), dummy_vectors)
-    gradcheck_naive(lambda vec: word2vec_sgd_wrapper(skipgram, dummy_tokens, vec, dataset, 5, negSamplingCostAndGradient), dummy_vectors)
+    gradcheck_naive(lambda vec: word2vec_sgd_wrapper(skipgram, dummy_tokens, vec, dataset, 5, negSamplingCostAndGradientUn), dummy_vectors)
     # print "\n==== Gradient check for CBOW      ===="
     # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(cbow, dummy_tokens, vec, dataset, 5), dummy_vectors)
     # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(cbow, dummy_tokens, vec, dataset, 5, negSamplingCostAndGradient), dummy_vectors)
