@@ -2,6 +2,7 @@ import numpy as np
 import random
 import sys
 from collections import Counter
+import time
 
 from q1_softmax import softmax
 from q2_gradcheck import gradcheck_naive
@@ -309,7 +310,7 @@ def test_word2vec():
     dummy_tokens = dict([("a",0), ("b",1), ("c",2),("d",3),("e",4)])
     print "==== Gradient check for skip-gram ===="
     # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(skipgram, dummy_tokens, vec, dataset, 5), dummy_vectors)
-    gradcheck_naive(lambda vec: word2vec_sgd_wrapper(skipgram, dummy_tokens, vec, dataset, 5, negSamplingCostAndGradientUn), dummy_vectors)
+    # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(skipgram, dummy_tokens, vec, dataset, 5, negSamplingCostAndGradient), dummy_vectors)
     # print "\n==== Gradient check for CBOW      ===="
     # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(cbow, dummy_tokens, vec, dataset, 5), dummy_vectors)
     # gradcheck_naive(lambda vec: word2vec_sgd_wrapper(cbow, dummy_tokens, vec, dataset, 5, negSamplingCostAndGradient), dummy_vectors)
@@ -320,6 +321,40 @@ def test_word2vec():
     # print cbow("a", 2, ["a", "b", "c", "a"], dummy_tokens, dummy_vectors[:5,:], dummy_vectors[5:,:], dataset)
     # print cbow("a", 2, ["a", "b", "a", "c"], dummy_tokens, dummy_vectors[:5,:], dummy_vectors[5:,:], dataset, negSamplingCostAndGradient)
 
+def my_tests():
+    dataset = type('dummy', (), {})()
+    def dummySampleTokenIdx():
+        return random.randint(0, 4)
+
+    def getRandomContext(C):
+        tokens = ["a", "b", "c", "d", "e"]
+        return tokens[random.randint(0,4)], [tokens[random.randint(0,4)] \
+           for i in xrange(2*C)]
+    dataset.sampleTokenIdx = dummySampleTokenIdx
+    dataset.getRandomContext = getRandomContext
+
+    random.seed(31415)
+    np.random.seed(9265)
+    dummy_vectors = normalizeRows(np.random.randn(10,3))
+    dummy_tokens = dict([("a",0), ("b",1), ("c",2),("d",3),("e",4)])
+
+    print "vectorised version of negative sampling cost and gradient"
+    start_time = time.time()
+    word2vec_sgd_wrapper(skipgram, dummy_tokens, dummy_vectors, dataset, 5, negSamplingCostAndGradient)
+    end_time = time.time()
+    print "It took %f seconds" % (end_time - start_time,)
+
+    print "un vectorised version of negative sampling cost and gradient"
+    start_time = time.time()
+    word2vec_sgd_wrapper(skipgram, dummy_tokens, dummy_vectors, dataset, 5, negSamplingCostAndGradientUn)
+    end_time = time.time()
+    print "It took %f seconds" % (end_time - start_time,)
+
+
+
+
+
 if __name__ == "__main__":
-    test_normalize_rows()
-    test_word2vec()
+    # test_normalize_rows()
+    # test_word2vec()
+    my_tests()
