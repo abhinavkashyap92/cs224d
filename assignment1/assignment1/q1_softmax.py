@@ -19,13 +19,7 @@ def softmax(x):
 
     You must implement the optimization in problem 1(a) of the
     written assignment
-    """
-    ############################################################################
-    #   sigma(x)_i = np.exp(x_i) / sum_{j=1}{d} np.exp(x_j)                    #
-    #   xi is the score of the right class
-    #   j runs from 1 to number of classes
-    #   Just make sure that the sigmoid function is also numerically stable    #
-    ############################################################################
+    """    
     ### YOUR CODE HERE
     axis = x.ndim -1
     probs = x.copy().astype('float64')
