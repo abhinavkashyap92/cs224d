@@ -56,7 +56,10 @@ def cross_entropy_loss(y, yhat):
           tensor in the problem.
   """
   ### YOUR CODE HERE
-  raise NotImplementedError
+  y = tf.to_float(y)
+  log_yhat = tf.log(yhat)
+  multiplication = tf.mul(y, log_yhat)
+  out = -tf.reduce_sum(multiplication)
   ### END YOUR CODE
   return out
 
@@ -70,7 +73,7 @@ def test_softmax_basic():
   test1 = softmax(tf.convert_to_tensor(
       np.array([[1001,1002],[3,4]]), dtype=tf.float32))
   with tf.Session():
-      test1 = test1.eval()      
+      test1 = test1.eval()
   assert np.amax(np.fabs(test1 - np.array(
       [0.26894142,  0.73105858]))) <= 1e-6
 
@@ -95,6 +98,7 @@ def test_cross_entropy_loss_basic():
       tf.convert_to_tensor(y, dtype=tf.int32),
       tf.convert_to_tensor(yhat, dtype=tf.float32))
   with tf.Session():
+
     test1 = test1.eval()
   result = -3 * np.log(.5)
   assert np.amax(np.fabs(test1 - result)) <= 1e-6
@@ -102,4 +106,4 @@ def test_cross_entropy_loss_basic():
 
 if __name__ == "__main__":
   test_softmax_basic()
-  # test_cross_entropy_loss_basic()
+  test_cross_entropy_loss_basic()
